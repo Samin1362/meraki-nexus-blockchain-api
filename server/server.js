@@ -1,22 +1,23 @@
 const express = require("express");
 const cors = require("cors");
 const { Web3 } = require("web3");
-const PaymentContract = require("./build/contracts/PaymentContract.json");
+const PaymentContract = require("../build/contracts/PaymentContract.json");
 
 const app = express();
-const PORT = 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Environment variables
+// Environment variables with fallbacks
 const BLOCKCHAIN_RPC_URL =
   process.env.ALCHEMY_API_URL ||
   process.env.BLOCKCHAIN_RPC_URL ||
   "http://127.0.0.1:7545";
 const CONTRACT_ADDRESS =
   process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
+const NODE_ENV = process.env.NODE_ENV || "development";
+const PORT = process.env.PORT || 3000;
 
 // Initialize Web3 and contract
 const web3 = new Web3(BLOCKCHAIN_RPC_URL);
@@ -154,7 +155,7 @@ app.listen(PORT, () => {
   console.log(`💳 Payment API: http://localhost:${PORT}/api/payment`);
   console.log("");
   console.log("📝 Postman Test:");
-  console.log("POST http://localhost:3000/api/payment");
+  console.log(`POST http://localhost:${PORT}/api/payment`);
   console.log("Content-Type: application/json");
   console.log(
     JSON.stringify(

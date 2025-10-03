@@ -4,15 +4,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment variables
+# Environment variables (SECRET - DO NOT COMMIT)
 .env
 .env.local
-.env.production
-.env.staging
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Build outputs
+# Build artifacts
 build/
 dist/
+.truffle/
 
 # IDE
 .vscode/
@@ -37,9 +39,9 @@ pids/
 # Coverage directory used by tools like istanbul
 coverage/
 
-# Truffle
-.truffle/
-
 # Vercel
 .vercel/
-.vercel
+
+# Temporary files
+*.tmp
+*.temp
