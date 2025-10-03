@@ -12,7 +12,9 @@ app.use(express.json());
 
 // Environment variables
 const BLOCKCHAIN_RPC_URL =
-  process.env.BLOCKCHAIN_RPC_URL || "http://localhost:7545";
+  process.env.ALCHEMY_API_URL ||
+  process.env.BLOCKCHAIN_RPC_URL ||
+  "http://127.0.0.1:7545";
 const CONTRACT_ADDRESS =
   process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
 
@@ -76,12 +78,28 @@ app.post("/api/payment", async (req, res) => {
       `🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`
     );
 
-    // Send payment transaction
-    const tx = await contract.methods.sendPayment(receiver).send({
-      from: sender,
+    // Get account from private key for signing
+    const privateKey = process.env.PRIVATE_KEY.startsWith("0x")
+      ? process.env.PRIVATE_KEY
+      : "0x" + process.env.PRIVATE_KEY;
+    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+
+    // Build transaction
+    const txData = contract.methods.sendPayment(receiver).encodeABI();
+    const tx = {
+      from: account.address,
+      to: CONTRACT_ADDRESS,
       value: amountInWei,
       gas: 300000,
-    });
+      gasPrice: 20000000000, // 20 gwei
+      data: txData,
+    };
+
+    // Sign and send transaction
+    const signedTx = await account.signTransaction(tx);
+    const receipt = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
 
     // Get transaction details
     const transactionCount = await contract.methods
@@ -98,9 +116,9 @@ app.post("/api/payment", async (req, res) => {
       sender: sender,
       receiver: receiver,
       amount: amount + " ETH",
-      transactionHash: tx.transactionHash,
+      transactionHash: receipt.transactionHash,
       transactionId: transactionId.toString(),
-      gasUsed: tx.gasUsed.toString(),
+      gasUsed: receipt.gasUsed.toString(),
       timestamp: new Date().toISOString(),
     };
 
