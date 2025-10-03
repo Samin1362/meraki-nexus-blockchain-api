@@ -1,5 +1,48 @@
 const { Web3 } = require("web3");
-const PaymentContract = require("../build/contracts/PaymentContract.json");
+
+// PaymentContract ABI (simplified)
+const PaymentContractABI = [
+  {
+    "anonymous": false,
+    "inputs": [
+      {"indexed": true, "internalType": "uint256", "name": "transactionId", "type": "uint256"},
+      {"indexed": true, "internalType": "address", "name": "sender", "type": "address"},
+      {"indexed": true, "internalType": "address", "name": "receiver", "type": "address"},
+      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
+      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    ],
+    "name": "PaymentSent",
+    "type": "event"
+  },
+  {
+    "inputs": [{"internalType": "address payable", "name": "receiver", "type": "address"}],
+    "name": "sendPayment",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint256", "name": "_transactionId", "type": "uint256"}],
+    "name": "getTransaction",
+    "outputs": [
+      {"internalType": "uint256", "name": "id", "type": "uint256"},
+      {"internalType": "address", "name": "sender", "type": "address"},
+      {"internalType": "address", "name": "receiver", "type": "address"},
+      {"internalType": "uint256", "name": "amount", "type": "uint256"},
+      {"internalType": "uint256", "name": "timestamp", "type": "uint256"},
+      {"internalType": "bool", "name": "completed", "type": "bool"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getTransactionCount",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
 // Initialize Web3 and contract
 let web3, contract;
@@ -10,7 +53,7 @@ const initializeWeb3 = () => {
     const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
     
     web3 = new Web3(BLOCKCHAIN_RPC_URL);
-    contract = new web3.eth.Contract(PaymentContract.abi, CONTRACT_ADDRESS);
+    contract = new web3.eth.Contract(PaymentContractABI, CONTRACT_ADDRESS);
   }
   return { web3, contract };
 };
