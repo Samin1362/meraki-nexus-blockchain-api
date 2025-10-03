@@ -40,15 +40,15 @@ app.get("/health", (req, res) => {
 // Payment endpoint
 app.post("/api/payment", async (req, res) => {
   try {
-    const { sender, receiver, amount } = req.body;
+    const { sender, receiver, amount, senderPrivateKey } = req.body;
 
     console.log(`💳 Payment Request: ${sender} → ${receiver} (${amount} ETH)`);
 
     // Validate input
-    if (!sender || !receiver || !amount) {
+    if (!sender || !receiver || !amount || !senderPrivateKey) {
       return res.status(400).json({
         status: "error",
-        message: "Missing required fields: sender, receiver, amount",
+        message: "Missing required fields: sender, receiver, amount, senderPrivateKey",
         timestamp: new Date().toISOString(),
       });
     }
@@ -79,11 +79,20 @@ app.post("/api/payment", async (req, res) => {
       `🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`
     );
 
-    // Get account from private key for signing
-    const privateKey = process.env.PRIVATE_KEY.startsWith("0x")
-      ? process.env.PRIVATE_KEY
-      : "0x" + process.env.PRIVATE_KEY;
+    // Get account from private key for signing (from request body)
+    const privateKey = senderPrivateKey.startsWith("0x")
+      ? senderPrivateKey
+      : "0x" + senderPrivateKey;
     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    
+    // Verify that the sender address matches the private key
+    if (account.address.toLowerCase() !== sender.toLowerCase()) {
+      return res.status(400).json({
+        status: "error",
+        message: "Sender address does not match the provided private key",
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Build transaction
     const txData = contract.methods.sendPayment(receiver).encodeABI();
@@ -163,6 +172,7 @@ app.listen(PORT, () => {
         sender: "0x3B3a5d0E2941ec48AD8C6062367F1f12f5346faB",
         receiver: "0x5bFdc3D781CD81Fb8814B08E1439D639b0d4Fb48",
         amount: "0.1",
+        senderPrivateKey: "YOUR_SENDER_PRIVATE_KEY_HERE"
       },
       null,
       2

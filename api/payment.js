@@ -94,13 +94,13 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { sender, receiver, amount } = req.body;
+    const { sender, receiver, amount, senderPrivateKey } = req.body;
 
     // Input validation
-    if (!sender || !receiver || !amount) {
+    if (!sender || !receiver || !amount || !senderPrivateKey) {
       return res.status(400).json({
         status: "error",
-        message: "Missing required fields: sender, receiver, amount",
+        message: "Missing required fields: sender, receiver, amount, senderPrivateKey",
         timestamp: new Date().toISOString(),
       });
     }
@@ -144,11 +144,20 @@ module.exports = async (req, res) => {
       `🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`
     );
 
-    // Get account from private key for signing
-    const privateKey = process.env.PRIVATE_KEY.startsWith("0x")
-      ? process.env.PRIVATE_KEY
-      : "0x" + process.env.PRIVATE_KEY;
+    // Get account from private key for signing (from request body)
+    const privateKey = senderPrivateKey.startsWith("0x")
+      ? senderPrivateKey
+      : "0x" + senderPrivateKey;
     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    
+    // Verify that the sender address matches the private key
+    if (account.address.toLowerCase() !== sender.toLowerCase()) {
+      return res.status(400).json({
+        status: "error",
+        message: "Sender address does not match the provided private key",
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Build transaction
     const txData = contract.methods.sendPayment(receiver).encodeABI();
