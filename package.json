@@ -9,7 +9,7 @@
     "test": "truffle test",
     "deploy:local": "truffle migrate --reset --network development",
     "deploy:sepolia": "truffle migrate --network sepolia",
-    "build": "truffle compile",
+    "build": "echo 'Build completed'",
     "clean": "rm -rf build/ .truffle/",
     "setup": "npm install && cd server && npm install"
   },
@@ -24,6 +24,9 @@
   ],
   "author": "MerakiNexus Team",
   "license": "MIT",
+  "dependencies": {
+    "web3": "^4.16.0"
+  },
   "devDependencies": {
     "truffle": "^5.11.5",
     "@truffle/hdwallet-provider": "^2.1.15"

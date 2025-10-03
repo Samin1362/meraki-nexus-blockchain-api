@@ -115,7 +115,10 @@ module.exports = async (req, res) => {
       "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
 
     const web3 = new Web3(BLOCKCHAIN_RPC_URL);
-    const contract = new web3.eth.Contract(PaymentContractABI, CONTRACT_ADDRESS);
+    const contract = new web3.eth.Contract(
+      PaymentContractABI,
+      CONTRACT_ADDRESS
+    );
 
     if (!web3.utils.isAddress(sender) || !web3.utils.isAddress(receiver)) {
       return res.status(400).json({
