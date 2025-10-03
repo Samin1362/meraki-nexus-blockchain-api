@@ -42,9 +42,7 @@ app.post("/api/payment", async (req, res) => {
   try {
     const { sender, receiver, amount } = req.body;
 
-    console.log(`💳 Payment Request: ${sender} → ${receiver} (${amount} ETH)`);
-
-    // Validate input
+    // Input validation
     if (!sender || !receiver || !amount) {
       return res.status(400).json({
         status: "error",
@@ -53,7 +51,6 @@ app.post("/api/payment", async (req, res) => {
       });
     }
 
-    // Validate Ethereum addresses
     if (!web3.utils.isAddress(sender) || !web3.utils.isAddress(receiver)) {
       return res.status(400).json({
         status: "error",
@@ -62,7 +59,6 @@ app.post("/api/payment", async (req, res) => {
       });
     }
 
-    // Validate amount
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
       return res.status(400).json({
@@ -148,24 +144,5 @@ app.post("/api/payment", async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🎉 MerakiNexus Payment API running on http://localhost:${PORT}`);
-  console.log(`📋 Health check: http://localhost:${PORT}/health`);
-  console.log(`💳 Payment API: http://localhost:${PORT}/api/payment`);
-  console.log("");
-  console.log("📝 Postman Test:");
-  console.log(`POST http://localhost:${PORT}/api/payment`);
-  console.log("Content-Type: application/json");
-  console.log(
-    JSON.stringify(
-      {
-        sender: "0x3B3a5d0E2941ec48AD8C6062367F1f12f5346faB",
-        receiver: "0x5bFdc3D781CD81Fb8814B08E1439D639b0d4Fb48",
-        amount: "0.1",
-      },
-      null,
-      2
-    )
-  );
-});
+// Export for Vercel
+module.exports = app;
