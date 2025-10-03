@@ -3,45 +3,74 @@ const { Web3 } = require("web3");
 // PaymentContract ABI (simplified)
 const PaymentContractABI = [
   {
-    "anonymous": false,
-    "inputs": [
-      {"indexed": true, "internalType": "uint256", "name": "transactionId", "type": "uint256"},
-      {"indexed": true, "internalType": "address", "name": "sender", "type": "address"},
-      {"indexed": true, "internalType": "address", "name": "receiver", "type": "address"},
-      {"indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256"},
-      {"indexed": false, "internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "transactionId",
+        type: "uint256",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
     ],
-    "name": "PaymentSent",
-    "type": "event"
+    name: "PaymentSent",
+    type: "event",
   },
   {
-    "inputs": [{"internalType": "address payable", "name": "receiver", "type": "address"}],
-    "name": "sendPayment",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [{"internalType": "uint256", "name": "_transactionId", "type": "uint256"}],
-    "name": "getTransaction",
-    "outputs": [
-      {"internalType": "uint256", "name": "id", "type": "uint256"},
-      {"internalType": "address", "name": "sender", "type": "address"},
-      {"internalType": "address", "name": "receiver", "type": "address"},
-      {"internalType": "uint256", "name": "amount", "type": "uint256"},
-      {"internalType": "uint256", "name": "timestamp", "type": "uint256"},
-      {"internalType": "bool", "name": "completed", "type": "bool"}
+    inputs: [
+      { internalType: "address payable", name: "receiver", type: "address" },
     ],
-    "stateMutability": "view",
-    "type": "function"
+    name: "sendPayment",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "payable",
+    type: "function",
   },
   {
-    "inputs": [],
-    "name": "getTransactionCount",
-    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  }
+    inputs: [
+      { internalType: "uint256", name: "_transactionId", type: "uint256" },
+    ],
+    name: "getTransaction",
+    outputs: [
+      { internalType: "uint256", name: "id", type: "uint256" },
+      { internalType: "address", name: "sender", type: "address" },
+      { internalType: "address", name: "receiver", type: "address" },
+      { internalType: "uint256", name: "amount", type: "uint256" },
+      { internalType: "uint256", name: "timestamp", type: "uint256" },
+      { internalType: "bool", name: "completed", type: "bool" },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getTransactionCount",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
 ];
 
 // Initialize Web3 and contract
@@ -49,9 +78,14 @@ let web3, contract;
 
 const initializeWeb3 = () => {
   if (!web3) {
-    const BLOCKCHAIN_RPC_URL = process.env.ALCHEMY_API_URL || process.env.BLOCKCHAIN_RPC_URL || "http://127.0.0.1:7545";
-    const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
-    
+    const BLOCKCHAIN_RPC_URL =
+      process.env.ALCHEMY_API_URL ||
+      process.env.BLOCKCHAIN_RPC_URL ||
+      "http://127.0.0.1:7545";
+    const CONTRACT_ADDRESS =
+      process.env.CONTRACT_ADDRESS ||
+      "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
+
     web3 = new Web3(BLOCKCHAIN_RPC_URL);
     contract = new web3.eth.Contract(PaymentContractABI, CONTRACT_ADDRESS);
   }
@@ -61,16 +95,21 @@ const initializeWeb3 = () => {
 // Health check handler
 const handleHealth = async (req, res) => {
   const { web3, contract } = initializeWeb3();
-  
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
+
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   res.json({
     status: "healthy",
     timestamp: new Date().toISOString(),
-    blockchain: process.env.ALCHEMY_API_URL || process.env.BLOCKCHAIN_RPC_URL || "http://127.0.0.1:7545",
-    contract: process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd",
+    blockchain:
+      process.env.ALCHEMY_API_URL ||
+      process.env.BLOCKCHAIN_RPC_URL ||
+      "http://127.0.0.1:7545",
+    contract:
+      process.env.CONTRACT_ADDRESS ||
+      "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd",
   });
 };
 
@@ -109,7 +148,9 @@ const handlePayment = async (req, res) => {
     // Convert amount to Wei
     const amountInWei = web3.utils.toWei(amountNum.toString(), "ether");
 
-    console.log(`🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`);
+    console.log(
+      `🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`
+    );
 
     // Get account from private key for signing
     const privateKey = process.env.PRIVATE_KEY.startsWith("0x")
@@ -130,10 +171,14 @@ const handlePayment = async (req, res) => {
 
     // Sign and send transaction
     const signedTx = await account.signTransaction(tx);
-    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    const receipt = await web3.eth.sendSignedTransaction(
+      signedTx.rawTransaction
+    );
 
     // Get transaction details
-    const transactionCount = await contract.methods.getTransactionCount().call();
+    const transactionCount = await contract.methods
+      .getTransactionCount()
+      .call();
     const transactionId = Number(transactionCount.toString()) - 1;
 
     // Success response
@@ -166,7 +211,8 @@ const handlePayment = async (req, res) => {
     return res.status(500).json({
       status: "error",
       message: errorMessage,
-      details: process.env.NODE_ENV === "development" ? error.message : undefined,
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
       timestamp: new Date().toISOString(),
     });
   }
@@ -175,21 +221,27 @@ const handlePayment = async (req, res) => {
 // Main handler
 module.exports = async (req, res) => {
   // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   // Handle preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
   // Route requests
-  if (req.method === 'GET' && (req.url === '/health' || req.url === '/api/health')) {
+  if (
+    req.method === "GET" &&
+    (req.url === "/health" || req.url === "/api/health")
+  ) {
     return handleHealth(req, res);
   }
-  
-  if (req.method === 'POST' && (req.url === '/api/payment' || req.url === '/payment')) {
+
+  if (
+    req.method === "POST" &&
+    (req.url === "/api/payment" || req.url === "/payment")
+  ) {
     return handlePayment(req, res);
   }
 
