@@ -15,8 +15,5 @@
       "src": "/health",
       "dest": "/api/payment.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }

@@ -1,45 +1,40 @@
-const express = require("express");
-const cors = require("cors");
 const { Web3 } = require("web3");
 const PaymentContract = require("../build/contracts/PaymentContract.json");
 
-const app = express();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Environment variables with fallbacks
-const BLOCKCHAIN_RPC_URL =
-  process.env.ALCHEMY_API_URL ||
-  process.env.BLOCKCHAIN_RPC_URL ||
-  "http://127.0.0.1:7545";
-const CONTRACT_ADDRESS =
-  process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
-const NODE_ENV = process.env.NODE_ENV || "development";
-const PORT = process.env.PORT || 3000;
-
 // Initialize Web3 and contract
-const web3 = new Web3(BLOCKCHAIN_RPC_URL);
-const contract = new web3.eth.Contract(PaymentContract.abi, CONTRACT_ADDRESS);
+let web3, contract;
 
-console.log("🚀 MerakiNexus Payment API Server Starting...");
-console.log(`📡 Blockchain RPC: ${BLOCKCHAIN_RPC_URL}`);
-console.log(`📄 Contract Address: ${CONTRACT_ADDRESS}`);
+const initializeWeb3 = () => {
+  if (!web3) {
+    const BLOCKCHAIN_RPC_URL = process.env.ALCHEMY_API_URL || process.env.BLOCKCHAIN_RPC_URL || "http://127.0.0.1:7545";
+    const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
+    
+    web3 = new Web3(BLOCKCHAIN_RPC_URL);
+    contract = new web3.eth.Contract(PaymentContract.abi, CONTRACT_ADDRESS);
+  }
+  return { web3, contract };
+};
 
-// Health check endpoint
-app.get("/health", (req, res) => {
+// Health check handler
+const handleHealth = async (req, res) => {
+  const { web3, contract } = initializeWeb3();
+  
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   res.json({
     status: "healthy",
     timestamp: new Date().toISOString(),
-    blockchain: BLOCKCHAIN_RPC_URL,
-    contract: CONTRACT_ADDRESS,
+    blockchain: process.env.ALCHEMY_API_URL || process.env.BLOCKCHAIN_RPC_URL || "http://127.0.0.1:7545",
+    contract: process.env.CONTRACT_ADDRESS || "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd",
   });
-});
+};
 
-// Payment endpoint
-app.post("/api/payment", async (req, res) => {
+// Payment handler
+const handlePayment = async (req, res) => {
   try {
+    const { web3, contract } = initializeWeb3();
     const { sender, receiver, amount } = req.body;
 
     // Input validation
@@ -71,9 +66,7 @@ app.post("/api/payment", async (req, res) => {
     // Convert amount to Wei
     const amountInWei = web3.utils.toWei(amountNum.toString(), "ether");
 
-    console.log(
-      `🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`
-    );
+    console.log(`🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`);
 
     // Get account from private key for signing
     const privateKey = process.env.PRIVATE_KEY.startsWith("0x")
@@ -85,7 +78,7 @@ app.post("/api/payment", async (req, res) => {
     const txData = contract.methods.sendPayment(receiver).encodeABI();
     const tx = {
       from: account.address,
-      to: CONTRACT_ADDRESS,
+      to: process.env.CONTRACT_ADDRESS,
       value: amountInWei,
       gas: 300000,
       gasPrice: 20000000000, // 20 gwei
@@ -94,18 +87,11 @@ app.post("/api/payment", async (req, res) => {
 
     // Sign and send transaction
     const signedTx = await account.signTransaction(tx);
-    const receipt = await web3.eth.sendSignedTransaction(
-      signedTx.rawTransaction
-    );
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
     // Get transaction details
-    const transactionCount = await contract.methods
-      .getTransactionCount()
-      .call();
+    const transactionCount = await contract.methods.getTransactionCount().call();
     const transactionId = Number(transactionCount.toString()) - 1;
-    const transaction = await contract.methods
-      .getTransaction(transactionId)
-      .call();
 
     // Success response
     const successResponse = {
@@ -137,12 +123,37 @@ app.post("/api/payment", async (req, res) => {
     return res.status(500).json({
       status: "error",
       message: errorMessage,
-      details:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
+      details: process.env.NODE_ENV === "development" ? error.message : undefined,
       timestamp: new Date().toISOString(),
     });
   }
-});
+};
 
-// Export for Vercel
-module.exports = app;
+// Main handler
+module.exports = async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Route requests
+  if (req.method === 'GET' && (req.url === '/health' || req.url === '/api/health')) {
+    return handleHealth(req, res);
+  }
+  
+  if (req.method === 'POST' && (req.url === '/api/payment' || req.url === '/payment')) {
+    return handlePayment(req, res);
+  }
+
+  // Default response
+  res.status(404).json({
+    status: "error",
+    message: "Endpoint not found",
+    timestamp: new Date().toISOString(),
+  });
+};
