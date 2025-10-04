@@ -75,8 +75,10 @@
                 <button
                   id="disconnectWallet"
                   class="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-all"
+                  onclick="handleDisconnectClick()"
                 >
-                  Disconnect
+                  <span id="disconnectText">Disconnect</span>
+                  <span id="disconnectLoading" class="hidden">Disconnecting...</span>
                 </button>
               </div>
 
@@ -262,48 +264,48 @@
         }
       }
 
-       // Check MetaMask connection status
-       async function checkMetaMaskConnection() {
-         // Reset all state variables first
-         isConnected = false;
-         currentAccount = null;
-         currentNetwork = null;
+      // Check MetaMask connection status
+      async function checkMetaMaskConnection() {
+        // Reset all state variables first
+        isConnected = false;
+        currentAccount = null;
+        currentNetwork = null;
 
-         if (typeof window.ethereum === "undefined") {
-           console.log("MetaMask not available");
-           updateUI();
-           return;
-         }
+        if (typeof window.ethereum === "undefined") {
+          console.log("MetaMask not available");
+          updateUI();
+          return;
+        }
 
-         try {
-           // Check if MetaMask is unlocked and user is logged in
-           const accounts = await window.ethereum.request({
-             method: "eth_accounts",
-           });
-           const chainId = await window.ethereum.request({
-             method: "eth_chainId",
-           });
+        try {
+          // Check if MetaMask is unlocked and user is logged in
+          const accounts = await window.ethereum.request({
+            method: "eth_accounts",
+          });
+          const chainId = await window.ethereum.request({
+            method: "eth_chainId",
+          });
 
-           if (accounts.length > 0 && chainId) {
-             currentAccount = accounts[0];
-             isConnected = true;
-             await getCurrentNetwork();
-             console.log("MetaMask connected:", currentAccount);
-           } else {
-             console.log("MetaMask not connected or locked");
-             isConnected = false;
-             currentAccount = null;
-             currentNetwork = null;
-           }
-         } catch (error) {
-           console.log("MetaMask connection error:", error);
-           isConnected = false;
-           currentAccount = null;
-           currentNetwork = null;
-         }
+          if (accounts.length > 0 && chainId) {
+            currentAccount = accounts[0];
+            isConnected = true;
+            await getCurrentNetwork();
+            console.log("MetaMask connected:", currentAccount);
+          } else {
+            console.log("MetaMask not connected or locked");
+            isConnected = false;
+            currentAccount = null;
+            currentNetwork = null;
+          }
+        } catch (error) {
+          console.log("MetaMask connection error:", error);
+          isConnected = false;
+          currentAccount = null;
+          currentNetwork = null;
+        }
 
-         updateUI();
-       }
+        updateUI();
+      }
 
       // Setup event listeners
       function setupEventListeners() {
@@ -312,7 +314,7 @@
           .addEventListener("click", connectMetaMask);
         document
           .getElementById("disconnectWallet")
-          .addEventListener("click", disconnectWallet);
+          .addEventListener("click", handleDisconnectClick);
         document
           .getElementById("switchToSepolia")
           .addEventListener("click", () => switchNetwork("sepolia"));
@@ -394,20 +396,85 @@
         }
       }
 
+      // Handle disconnect button click with loading state
+      async function handleDisconnectClick() {
+        const disconnectBtn = document.getElementById("disconnectWallet");
+        const disconnectText = document.getElementById("disconnectText");
+        const disconnectLoading = document.getElementById("disconnectLoading");
+        
+        // Show loading state
+        disconnectBtn.disabled = true;
+        disconnectText.classList.add("hidden");
+        disconnectLoading.classList.remove("hidden");
+        
+        try {
+          await disconnectWallet();
+        } catch (error) {
+          console.error("Disconnect failed:", error);
+        } finally {
+          // Reset button state
+          disconnectBtn.disabled = false;
+          disconnectText.classList.remove("hidden");
+          disconnectLoading.classList.add("hidden");
+        }
+      }
+
       // Disconnect wallet
       async function disconnectWallet() {
         try {
+          // Try multiple disconnect methods for better compatibility
           if (window.ethereum.disconnect) {
             await window.ethereum.disconnect();
           }
+
+          // Try to revoke permissions
+          try {
+            await window.ethereum.request({
+              method: "wallet_requestPermissions",
+              params: [],
+            });
+          } catch (permError) {
+            console.log("Permission revocation failed:", permError);
+          }
+
+          // Try to close connection
+          if (window.ethereum.close) {
+            await window.ethereum.close();
+          }
+
+          // Force account disconnection by requesting empty permissions
+          try {
+            await window.ethereum.request({
+              method: "eth_requestAccounts",
+              params: [],
+            });
+          } catch (accountError) {
+            console.log("Account disconnection failed:", accountError);
+          }
+
+          // Try to trigger MetaMask disconnect dialog
+          try {
+            await window.ethereum.request({
+              method: "wallet_requestPermissions",
+              params: [{ eth_accounts: {} }],
+            });
+          } catch (dialogError) {
+            console.log("Disconnect dialog failed:", dialogError);
+          }
+
         } catch (error) {
           console.log("Disconnect error:", error);
         }
 
+        // Reset all state variables
         isConnected = false;
         currentAccount = null;
         currentNetwork = null;
+        
+        // Update UI immediately
         updateUI();
+        
+        console.log("Wallet disconnected successfully");
       }
 
       // Switch network
