@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, "../frontend/build")));
 
 // Environment variables
 const RPC_URL =
-  process.env.RPC_URL || "https://sepolia.infura.io/v3/YOUR_INFURA_KEY";
+  process.env.RPC_URL || "https://sepolia.drpc.org";
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "YOUR_PRIVATE_KEY";
 
 console.log("🚀 MerakiNexus Payment API with Frontend Integration Starting...");
@@ -95,8 +95,10 @@ app.post("/api/payment", async (req, res) => {
     }
 
     // Initialize provider and wallet
+    console.log(`🔗 Using RPC: ${RPC_URL}`);
     const provider = new ethers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(senderPrivateKey, provider);
+    console.log(`👛 Wallet address: ${wallet.address}`);
 
     // Verify sender address matches private key
     if (wallet.address.toLowerCase() !== sender.toLowerCase()) {
@@ -172,6 +174,7 @@ app.post("/api/payment", async (req, res) => {
     return res.status(200).json(successResponse);
   } catch (error) {
     console.error("❌ Payment failed:", error.message);
+    console.error("❌ Full error:", error);
 
     // Handle specific error types
     let errorMessage = "Transaction failed";
@@ -181,6 +184,10 @@ app.post("/api/payment", async (req, res) => {
       errorMessage = "Transaction rejected by user";
     } else if (error.message.includes("gas")) {
       errorMessage = "Gas estimation failed";
+    } else if (error.message.includes("network")) {
+      errorMessage = "Network connection failed";
+    } else if (error.message.includes("invalid private key")) {
+      errorMessage = "Invalid private key";
     }
 
     const errorResponse = {
