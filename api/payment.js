@@ -12,6 +12,9 @@ app.use(express.json());
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 
+// Serve static assets with proper headers
+app.use("/static", express.static(path.join(__dirname, "../frontend/build/static")));
+
 // Environment variables
 const RPC_URL = process.env.RPC_URL || "https://sepolia.drpc.org";
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "YOUR_PRIVATE_KEY";
