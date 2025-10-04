@@ -2,10 +2,10 @@
   "name": "merakinexus-payment-api",
   "version": "1.0.0",
   "description": "Simple blockchain payment API for MerakiNexus",
-  "main": "server.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
     "test": "echo 'Run tests from project root: npm test'",
     "build": "echo 'Build handled by project root'"
   },
