@@ -1,186 +1,143 @@
 # MerakiNexus Payment API
 
-A blockchain payment API built with Truffle, Web3.js, and Express. Supports both local development with Ganache and remote deployment on Vercel with Alchemy Sepolia.
+A blockchain payment API with integrated frontend for seamless ETH transactions via MetaMask or API fallback.
 
-## 🏗️ Project Structure
+## 🚀 Live Demo
 
-```
-MerakiNexus-Payment-API/
-├── server/                     # Node.js backend
-│   ├── server.js              # Express API server
-│   ├── package.json           # Server dependencies
-│   └── package-lock.json      # Lock file
-├── contracts/                  # Smart contracts
-│   └── PaymentContract.sol     # Payment smart contract
-├── migrations/                 # Deployment scripts
-│   └── 1_paymentContract.js   # Contract deployment
-├── test/                       # Tests
-│   └── PaymentContract.test.js # Contract tests
-├── build/                      # Compiled contracts
-│   └── contracts/
-│       └── PaymentContract.json
-├── frontend/                   # Frontend (if needed)
-├── truffle-config.js          # Truffle configuration
-├── vercel.json                # Vercel deployment config
-├── .env.template              # Environment template
-├── .gitignore                 # Git ignore rules
-└── README.md                  # This file
-```
+**Frontend:** https://meraki-nexus-blockchain-api.vercel.app/api/payment
 
-## 🚀 Quick Start
-
-### 1. Setup Environment
-
-```bash
-# Copy environment template
-cp .env.template .env
-
-# Edit .env with your values
-nano .env
-```
-
-### 2. Install Dependencies
-
-```bash
-npm run setup
-```
-
-### 3. Deploy Contract
-
-**For Local Development (Ganache):**
-
-```bash
-# Start Ganache first, then:
-npm run deploy:local
-```
-
-**For Sepolia Testnet:**
-
-```bash
-npm run deploy:sepolia
-```
-
-### 4. Start Server
-
-**Local Development:**
-
-```bash
-npm start
-```
-
-**With Custom Environment:**
-
-```bash
-cd server && node server.js
-```
-
-## 🔧 Environment Configuration
-
-### Local Development (.env)
-
-```bash
-# Use Ganache for local development
-BLOCKCHAIN_RPC_URL=http://127.0.0.1:7545
-CONTRACT_ADDRESS=your_local_contract_address
-NODE_ENV=development
-PORT=3000
-```
-
-### Remote Deployment (Vercel Environment Variables)
-
-```bash
-# Set these in Vercel Dashboard > Settings > Environment Variables
-ALCHEMY_API_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
-PRIVATE_KEY=your_private_key
-CONTRACT_ADDRESS=your_sepolia_contract_address
-NODE_ENV=production
-PORT=3000
-```
-
-## 📡 API Endpoints
+## 📋 API Endpoints
 
 ### Health Check
 
-```
-GET /health
+```bash
+GET https://meraki-nexus-blockchain-api.vercel.app/api/health
 ```
 
-### Payment
+### Payment Processing
+
+```bash
+POST https://meraki-nexus-blockchain-api.vercel.app/api/payment
+```
+
+## 💳 How to Use the API
+
+### 1. Frontend Integration (Recommended)
+
+**URL with Parameters:**
 
 ```
-POST /api/payment
-Content-Type: application/json
+https://meraki-nexus-blockchain-api.vercel.app/api/payment?receiver=0x123&amount=0.01&callback=https://your-app.com/notify
+```
 
+**Features:**
+
+- ✅ MetaMask wallet integration
+- ✅ Network switching (Sepolia, Mainnet, Goerli)
+- ✅ Fallback API form
+- ✅ Automatic callback notifications
+- ✅ Responsive design with animations
+
+### 2. Direct API Calls
+
+**Request Body:**
+
+```json
 {
-  "sender": "0x...",
-  "receiver": "0x...",
-  "amount": "0.1"
+  "sender": "0x9B79AF9bb193c295Dd63227cDFc59E091eDAcAeB",
+  "receiver": "0xC68D9470B03ab145CAA86009F0c4909386FAc709",
+  "amount": "0.001",
+  "senderPrivateKey": "50a73a23a57eb22ee1305b3af0fb210466a270b848ce6f4120b6460b3a4e2b68",
+  "callback": "https://your-app.com/notify"
 }
 ```
 
-## 🌐 Deployment
+**Success Response:**
 
-### Local Development
-
-1. Start Ganache
-2. Deploy: `npm run deploy:local`
-3. Start server: `npm start`
-4. Test: `curl http://localhost:3000/health`
-
-### Vercel Deployment
-
-1. Push to GitHub
-2. Connect to Vercel
-3. Set environment variables in Vercel dashboard
-4. Deploy automatically
-
-### Environment Variables for Vercel
-
-- `ALCHEMY_API_URL`: Your Alchemy Sepolia endpoint
-- `PRIVATE_KEY`: Your wallet private key
-- `CONTRACT_ADDRESS`: Deployed contract address
-- `NODE_ENV`: production
-
-## 🎯 Features
-
-- ✅ **Dual Environment**: Local (Ganache) + Remote (Sepolia)
-- ✅ **Secure**: Environment variables protected
-- ✅ **Deployable**: Vercel-ready configuration
-- ✅ **Tested**: Comprehensive test suite
-- ✅ **Documented**: Clear setup instructions
-
-## 🔒 Security
-
-- ✅ `.env` files are gitignored
-- ✅ Private keys never committed
-- ✅ Environment-specific configurations
-- ✅ Secure deployment practices
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Test API locally
-curl http://localhost:3000/health
-
-# Test payment
-curl -X POST http://localhost:3000/api/payment \
-  -H "Content-Type: application/json" \
-  -d '{"sender":"0x...","receiver":"0x...","amount":"0.001"}'
+```json
+{
+  "status": "success",
+  "txHash": "0x8e33faf9234e0fe1a44ee97b35fe8642492d091b7791505d5711393e60a0f15a",
+  "receiver": "0xC68D9470B03ab145CAA86009F0c4909386FAc709",
+  "amount": "0.001",
+  "gasUsed": "21000",
+  "blockNumber": 9339504,
+  "timestamp": "2025-10-04T07:00:49.611Z"
+}
 ```
 
-## 📝 Development Workflow
+**Error Response:**
 
-1. **Local Development**: Use Ganache + local .env
-2. **Testing**: Deploy to Sepolia testnet
-3. **Production**: Deploy to Vercel with environment variables
-4. **Security**: Never commit .env files
+```json
+{
+  "status": "error",
+  "message": "Transaction failed",
+  "timestamp": "2025-10-04T07:00:49.611Z"
+}
+```
 
-## 🚨 Important Notes
+## 🔧 Integration Examples
 
-- ⚠️ **Never commit `.env` files to Git**
-- ⚠️ **Use testnet ETH for Sepolia testing**
-- ⚠️ **Keep private keys secure**
-- ⚠️ **Test locally before deploying**
+### JavaScript/Frontend
+
+```javascript
+// Open payment page with pre-filled data
+const paymentUrl = `https://meraki-nexus-blockchain-api.vercel.app/api/payment?receiver=${receiverAddress}&amount=${amount}&callback=${callbackUrl}`;
+window.open(paymentUrl, "_blank");
+```
+
+### cURL
+
+```bash
+curl -X POST "https://meraki-nexus-blockchain-api.vercel.app/api/payment" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sender": "0x9B79AF9bb193c295Dd63227cDFc59E091eDAcAeB",
+    "receiver": "0xC68D9470B03ab145CAA86009F0c4909386FAc709",
+    "amount": "0.001",
+    "senderPrivateKey": "50a73a23a57eb22ee1305b3af0fb210466a270b848ce6f4120b6460b3a4e2b68"
+  }'
+```
+
+### Python
+
+```python
+import requests
+
+response = requests.post(
+    "https://meraki-nexus-blockchain-api.vercel.app/api/payment",
+    json={
+        "sender": "0x9B79AF9bb193c295Dd63227cDFc59E091eDAcAeB",
+        "receiver": "0xC68D9470B03ab145CAA86009F0c4909386FAc709",
+        "amount": "0.001",
+        "senderPrivateKey": "50a73a23a57eb22ee1305b3af0fb210466a270b848ce6f4120b6460b3a4e2b68"
+    }
+)
+print(response.json())
+```
+
+## 🌐 Network Support
+
+- **Sepolia Testnet** (Default)
+- **Ethereum Mainnet**
+- **Goerli Testnet**
+
+## 📱 Features
+
+- **MetaMask Integration** - Connect wallet, sign transactions
+- **Network Switching** - Switch between testnets and mainnet
+- **API Fallback** - Manual payment with private key
+- **Callback System** - Automatic result notifications
+- **Responsive Design** - Mobile and desktop optimized
+- **Real-time Updates** - Live transaction status
+
+## 🛠️ Tech Stack
+
+- **Backend:** Node.js, Express.js, Ethers.js
+- **Frontend:** HTML, TailwindCSS, GSAP, JavaScript
+- **Blockchain:** Ethereum, Sepolia Testnet
+- **Deployment:** Vercel
+
+## 📄 License
+
+MIT License - Built for MerakiNexus 🚀

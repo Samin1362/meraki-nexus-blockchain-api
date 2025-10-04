@@ -246,15 +246,50 @@
        async function checkMetaMaskConnection() {
          if (typeof window.ethereum !== 'undefined') {
            try {
+             // First check if we have accounts
              const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+             
              if (accounts.length > 0) {
-               currentAccount = accounts[0];
-               isConnected = true;
+               // Check if we have permission to access these accounts
+               try {
+                 const permissions = await window.ethereum.request({
+                   method: 'wallet_getPermissions',
+                 });
+                 
+                 // Check if eth_accounts permission exists and is active
+                 const hasEthAccountsPermission = permissions.some(
+                   permission => permission.parentCapability === 'eth_accounts'
+                 );
+                 
+                 if (hasEthAccountsPermission) {
+                   currentAccount = accounts[0];
+                   isConnected = true;
+                   updateUI();
+                   await getCurrentNetwork();
+                 } else {
+                   // No permission, reset connection state
+                   isConnected = false;
+                   currentAccount = null;
+                   updateUI();
+                 }
+               } catch (permError) {
+                 // If permission check fails, assume no connection
+                 console.log('Permission check failed, assuming no connection');
+                 isConnected = false;
+                 currentAccount = null;
+                 updateUI();
+               }
+             } else {
+               // No accounts, definitely not connected
+               isConnected = false;
+               currentAccount = null;
                updateUI();
-               await getCurrentNetwork();
              }
            } catch (error) {
              console.log('No existing connection');
+             isConnected = false;
+             currentAccount = null;
+             updateUI();
            }
          }
        }
