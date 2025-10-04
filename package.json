@@ -1,37 +1,37 @@
 {
-  "name": "merakinexus-payment-api",
-  "version": "1.0.0",
-  "description": "MerakiNexus Blockchain Payment API - Local Development & Vercel Deployment",
-  "main": "server/server.js",
+  "name": "meraki-nexus-payment-integrated",
+  "version": "2.0.0",
+  "description": "MerakiNexus Payment API with integrated React frontend",
+  "main": "api/payment.js",
   "scripts": {
-    "start": "cd server && node server.js",
-    "dev": "cd server && node server.js",
-    "test": "truffle test",
-    "deploy:local": "truffle migrate --reset --network development",
-    "deploy:sepolia": "truffle migrate --network sepolia",
-    "build": "echo 'Build completed'",
-    "clean": "rm -rf build/ .truffle/",
-    "setup": "npm install && cd server && npm install"
+    "build": "cd frontend && npm install && npm run build",
+    "start": "node api/payment.js",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:frontend\"",
+    "dev:api": "nodemon api/payment.js",
+    "dev:frontend": "cd frontend && npm start",
+    "deploy": "vercel --prod",
+    "test": "npm run build && npm start"
   },
-  "keywords": [
-    "blockchain",
-    "ethereum",
-    "payment",
-    "api",
-    "merakinexus",
-    "truffle",
-    "vercel"
-  ],
-  "author": "MerakiNexus Team",
-  "license": "MIT",
   "dependencies": {
-    "web3": "^4.16.0"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ethers": "^6.8.1"
   },
   "devDependencies": {
-    "truffle": "^5.11.5",
-    "@truffle/hdwallet-provider": "^2.1.15"
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "keywords": [
+    "blockchain",
+    "payment",
+    "ethereum",
+    "metamask",
+    "react",
+    "vercel"
+  ],
+  "author": "MerakiNexus",
+  "license": "MIT"
 }

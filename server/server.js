@@ -48,7 +48,8 @@ app.post("/api/payment", async (req, res) => {
     if (!sender || !receiver || !amount || !senderPrivateKey) {
       return res.status(400).json({
         status: "error",
-        message: "Missing required fields: sender, receiver, amount, senderPrivateKey",
+        message:
+          "Missing required fields: sender, receiver, amount, senderPrivateKey",
         timestamp: new Date().toISOString(),
       });
     }
@@ -84,7 +85,7 @@ app.post("/api/payment", async (req, res) => {
       ? senderPrivateKey
       : "0x" + senderPrivateKey;
     const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-    
+
     // Verify that the sender address matches the private key
     if (account.address.toLowerCase() !== sender.toLowerCase()) {
       return res.status(400).json({
@@ -172,7 +173,7 @@ app.listen(PORT, () => {
         sender: "0x3B3a5d0E2941ec48AD8C6062367F1f12f5346faB",
         receiver: "0x5bFdc3D781CD81Fb8814B08E1439D639b0d4Fb48",
         amount: "0.1",
-        senderPrivateKey: "YOUR_SENDER_PRIVATE_KEY_HERE"
+        senderPrivateKey: "YOUR_SENDER_PRIVATE_KEY_HERE",
       },
       null,
       2

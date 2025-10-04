@@ -1,126 +1,82 @@
-const { Web3 } = require("web3");
+const express = require("express");
+const cors = require("cors");
+const { ethers } = require("ethers");
+const path = require("path");
 
-// PaymentContract ABI (simplified)
-const PaymentContractABI = [
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "transactionId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "sender",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "receiver",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "PaymentSent",
-    type: "event",
-  },
-  {
-    inputs: [
-      { internalType: "address payable", name: "receiver", type: "address" },
-    ],
-    name: "sendPayment",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { internalType: "uint256", name: "_transactionId", type: "uint256" },
-    ],
-    name: "getTransaction",
-    outputs: [
-      { internalType: "uint256", name: "id", type: "uint256" },
-      { internalType: "address", name: "sender", type: "address" },
-      { internalType: "address", name: "receiver", type: "address" },
-      { internalType: "uint256", name: "amount", type: "uint256" },
-      { internalType: "uint256", name: "timestamp", type: "uint256" },
-      { internalType: "bool", name: "completed", type: "bool" },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getTransactionCount",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+const app = express();
 
-module.exports = async (req, res) => {
-  // Set CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+// Environment variables
+const RPC_URL =
+  process.env.RPC_URL || "https://sepolia.infura.io/v3/YOUR_INFURA_KEY";
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "YOUR_PRIVATE_KEY";
+
+console.log("🚀 MerakiNexus Payment API with Frontend Integration Starting...");
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    service: "MerakiNexus Payment API",
+    version: "2.0.0",
+  });
+});
+
+// Main payment endpoint - serves frontend or processes payment
+app.get("/api/payment", async (req, res) => {
+  const { receiver, amount, callback } = req.query;
+
+  // If query parameters are provided, serve the frontend with pre-filled data
+  if (receiver || amount || callback) {
+    console.log(
+      `📱 Serving frontend with params: receiver=${receiver}, amount=${amount}, callback=${callback}`
+    );
+
+    // Serve the React app with query parameters
+    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+    return;
   }
 
-  // Only allow POST requests
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      status: "error",
-      message: "Method not allowed. Use POST.",
-      timestamp: new Date().toISOString(),
-    });
-  }
+  // If no query params, return API info
+  res.json({
+    message: "MerakiNexus Payment API",
+    version: "2.0.0",
+    endpoints: {
+      frontend:
+        "/api/payment?receiver=0x123&amount=0.01&callback=https://example.com/notify",
+      health: "/api/health",
+      process: "POST /api/payment",
+    },
+    usage: "Add query parameters to open the payment frontend",
+  });
+});
 
+// Process payment endpoint
+app.post("/api/payment", async (req, res) => {
   try {
-    const { sender, receiver, amount, senderPrivateKey } = req.body;
+    const { sender, receiver, amount, senderPrivateKey, callback } = req.body;
 
-    // Input validation
+    console.log(`💳 Payment Request: ${sender} → ${receiver} (${amount} ETH)`);
+
+    // Validate input
     if (!sender || !receiver || !amount || !senderPrivateKey) {
       return res.status(400).json({
         status: "error",
-        message: "Missing required fields: sender, receiver, amount, senderPrivateKey",
+        message:
+          "Missing required fields: sender, receiver, amount, senderPrivateKey",
         timestamp: new Date().toISOString(),
       });
     }
 
-    // Initialize Web3
-    const BLOCKCHAIN_RPC_URL =
-      process.env.ALCHEMY_API_URL ||
-      process.env.BLOCKCHAIN_RPC_URL ||
-      "http://127.0.0.1:7545";
-    const CONTRACT_ADDRESS =
-      process.env.CONTRACT_ADDRESS ||
-      "0xda9053D313bdE1FA8E3917aa82b0E1B2329531cd";
-
-    const web3 = new Web3(BLOCKCHAIN_RPC_URL);
-    const contract = new web3.eth.Contract(
-      PaymentContractABI,
-      CONTRACT_ADDRESS
-    );
-
-    if (!web3.utils.isAddress(sender) || !web3.utils.isAddress(receiver)) {
+    // Validate Ethereum addresses
+    if (!ethers.isAddress(sender) || !ethers.isAddress(receiver)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid Ethereum addresses",
@@ -128,6 +84,7 @@ module.exports = async (req, res) => {
       });
     }
 
+    // Validate amount
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
       return res.status(400).json({
@@ -137,21 +94,12 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Convert amount to Wei
-    const amountInWei = web3.utils.toWei(amountNum.toString(), "ether");
+    // Initialize provider and wallet
+    const provider = new ethers.JsonRpcProvider(RPC_URL);
+    const wallet = new ethers.Wallet(senderPrivateKey, provider);
 
-    console.log(
-      `🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`
-    );
-
-    // Get account from private key for signing (from request body)
-    const privateKey = senderPrivateKey.startsWith("0x")
-      ? senderPrivateKey
-      : "0x" + senderPrivateKey;
-    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-    
-    // Verify that the sender address matches the private key
-    if (account.address.toLowerCase() !== sender.toLowerCase()) {
+    // Verify sender address matches private key
+    if (wallet.address.toLowerCase() !== sender.toLowerCase()) {
       return res.status(400).json({
         status: "error",
         message: "Sender address does not match the provided private key",
@@ -159,42 +107,68 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Build transaction
-    const txData = contract.methods.sendPayment(receiver).encodeABI();
+    // Check balance
+    const balance = await provider.getBalance(sender);
+    const amountInWei = ethers.parseEther(amountNum.toString());
+
+    if (balance < amountInWei) {
+      return res.status(400).json({
+        status: "error",
+        message: "Insufficient balance for transaction",
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Create transaction
     const tx = {
-      from: account.address,
-      to: CONTRACT_ADDRESS,
+      to: receiver,
       value: amountInWei,
-      gas: 300000,
-      gasPrice: 20000000000, // 20 gwei
-      data: txData,
+      gasLimit: 21000,
     };
 
-    // Sign and send transaction
-    const signedTx = await account.signTransaction(tx);
-    const receipt = await web3.eth.sendSignedTransaction(
-      signedTx.rawTransaction
-    );
+    // Send transaction
+    const txResponse = await wallet.sendTransaction(tx);
+    console.log(`🚀 Transaction sent: ${txResponse.hash}`);
 
-    // Get transaction details
-    const transactionCount = await contract.methods
-      .getTransactionCount()
-      .call();
-    const transactionId = Number(transactionCount.toString()) - 1;
+    // Wait for confirmation
+    const receipt = await txResponse.wait();
+    console.log(`✅ Transaction confirmed: ${receipt.hash}`);
 
     // Success response
     const successResponse = {
       status: "success",
-      sender: sender,
+      txHash: receipt.hash,
       receiver: receiver,
-      amount: amount + " ETH",
-      transactionHash: receipt.transactionHash,
-      transactionId: transactionId.toString(),
+      amount: amount,
       gasUsed: receipt.gasUsed.toString(),
+      blockNumber: receipt.blockNumber,
       timestamp: new Date().toISOString(),
     };
 
     console.log("✅ Payment successful:", successResponse);
+
+    // Send callback if provided
+    if (callback) {
+      try {
+        console.log(`📤 Sending callback to: ${callback}`);
+        const callbackResponse = await fetch(callback, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(successResponse),
+        });
+
+        if (callbackResponse.ok) {
+          console.log("✅ Callback sent successfully");
+        } else {
+          console.log("⚠️ Callback failed:", callbackResponse.status);
+        }
+      } catch (callbackError) {
+        console.log("⚠️ Callback error:", callbackError.message);
+      }
+    }
+
     return res.status(200).json(successResponse);
   } catch (error) {
     console.error("❌ Payment failed:", error.message);
@@ -209,12 +183,55 @@ module.exports = async (req, res) => {
       errorMessage = "Gas estimation failed";
     }
 
-    return res.status(500).json({
+    const errorResponse = {
       status: "error",
       message: errorMessage,
-      details:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    // Send error callback if provided
+    const { callback } = req.body;
+    if (callback) {
+      try {
+        console.log(`📤 Sending error callback to: ${callback}`);
+        await fetch(callback, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(errorResponse),
+        });
+      } catch (callbackError) {
+        console.log("⚠️ Error callback failed:", callbackError.message);
+      }
+    }
+
+    return res.status(500).json(errorResponse);
   }
-};
+});
+
+// Catch-all handler for React routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+});
+
+// Start server if running directly
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(
+      `🎉 MerakiNexus Payment API running on http://localhost:${PORT}`
+    );
+    console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`💳 Payment API: http://localhost:${PORT}/api/payment`);
+    console.log(`🌐 Frontend: http://localhost:${PORT}`);
+    console.log("");
+    console.log("📝 Test URLs:");
+    console.log(`GET http://localhost:${PORT}/api/payment`);
+    console.log(
+      `GET http://localhost:${PORT}/api/payment?receiver=0x123&amount=0.01&callback=https://example.com/notify`
+    );
+  });
+}
+
+module.exports = app;
