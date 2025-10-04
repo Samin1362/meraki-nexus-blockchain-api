@@ -13,8 +13,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 
 // Environment variables
-const RPC_URL =
-  process.env.RPC_URL || "https://sepolia.drpc.org";
+const RPC_URL = process.env.RPC_URL || "https://sepolia.drpc.org";
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "YOUR_PRIVATE_KEY";
 
 console.log("🚀 MerakiNexus Payment API with Frontend Integration Starting...");
@@ -33,29 +32,13 @@ app.get("/api/health", (req, res) => {
 app.get("/api/payment", async (req, res) => {
   const { receiver, amount, callback } = req.query;
 
-  // If query parameters are provided, serve the frontend with pre-filled data
-  if (receiver || amount || callback) {
-    console.log(
-      `📱 Serving frontend with params: receiver=${receiver}, amount=${amount}, callback=${callback}`
-    );
+  // Always serve the frontend (with or without query parameters)
+  console.log(
+    `📱 Serving frontend with params: receiver=${receiver}, amount=${amount}, callback=${callback}`
+  );
 
-    // Serve the React app with query parameters
-    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
-    return;
-  }
-
-  // If no query params, return API info
-  res.json({
-    message: "MerakiNexus Payment API",
-    version: "2.0.0",
-    endpoints: {
-      frontend:
-        "/api/payment?receiver=0x123&amount=0.01&callback=https://example.com/notify",
-      health: "/api/health",
-      process: "POST /api/payment",
-    },
-    usage: "Add query parameters to open the payment frontend",
-  });
+  // Serve the React app
+  res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
 });
 
 // Process payment endpoint
