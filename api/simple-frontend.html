@@ -39,47 +39,62 @@
   </head>
   <body>
     <div id="root">
-       <!-- Navbar -->
-       <nav class="sticky top-0 z-50 glass border-b border-purple-500/20">
-         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-           <div class="flex justify-between items-center h-16">
-             <div class="flex items-center">
-               <h1 class="text-xl font-bold neon-text">MerakiNexus Payment</h1>
-             </div>
-             <div class="flex items-center space-x-4">
-               <!-- Network Switcher -->
-               <div id="networkSwitcher" class="hidden flex items-center space-x-2">
-                 <button id="switchToSepolia" class="px-3 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition-all">
-                   Sepolia
-                 </button>
-                 <button id="switchToMainnet" class="px-3 py-1 text-xs bg-gray-600 hover:bg-gray-700 text-white rounded transition-all">
-                   Mainnet
-                 </button>
-                 <button id="switchToGoerli" class="px-3 py-1 text-xs bg-gray-600 hover:bg-gray-700 text-white rounded transition-all">
-                   Goerli
-                 </button>
-               </div>
-               
-               <!-- Wallet Info -->
-               <div id="walletInfo" class="hidden flex items-center space-x-2">
-                 <span id="walletAddress" class="text-sm text-gray-300"></span>
-                 <span id="networkName" class="text-xs text-purple-400"></span>
-                 <button id="disconnectWallet" class="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-all">
-                   Disconnect
-                 </button>
-               </div>
-               
-               <!-- Connect Button -->
-               <button
-                 id="connectWallet"
-                 class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 neon-glow"
-               >
-                 🦊 Connect Wallet
-               </button>
-             </div>
-           </div>
-         </div>
-       </nav>
+      <!-- Navbar -->
+      <nav class="sticky top-0 z-50 glass border-b border-purple-500/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <div class="flex items-center">
+              <h1 class="text-xl font-bold neon-text">MerakiNexus Payment</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+              <!-- Network Switcher -->
+              <div
+                id="networkSwitcher"
+                class="hidden flex items-center space-x-2"
+              >
+                <button
+                  id="switchToSepolia"
+                  class="px-3 py-1 text-xs bg-purple-600 hover:bg-purple-700 text-white rounded transition-all"
+                >
+                  Sepolia
+                </button>
+                <button
+                  id="switchToMainnet"
+                  class="px-3 py-1 text-xs bg-gray-600 hover:bg-gray-700 text-white rounded transition-all"
+                >
+                  Mainnet
+                </button>
+                <button
+                  id="switchToGoerli"
+                  class="px-3 py-1 text-xs bg-gray-600 hover:bg-gray-700 text-white rounded transition-all"
+                >
+                  Goerli
+                </button>
+              </div>
+
+              <!-- Wallet Info -->
+              <div id="walletInfo" class="hidden flex items-center space-x-2">
+                <span id="walletAddress" class="text-sm text-gray-300"></span>
+                <span id="networkName" class="text-xs text-purple-400"></span>
+                <button
+                  id="disconnectWallet"
+                  class="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition-all"
+                >
+                  Disconnect
+                </button>
+              </div>
+
+              <!-- Connect Button -->
+              <button
+                id="connectWallet"
+                class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 neon-glow"
+              >
+                🦊 Connect Wallet
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       <!-- Hero Section -->
       <div class="text-center py-16">
@@ -91,18 +106,18 @@
         </p>
       </div>
 
-       <!-- Callback Status -->
-       <div id="callbackStatus" class="max-w-2xl mx-auto px-4 mb-6 hidden">
-         <div class="glass rounded-2xl p-6 border border-blue-500/30">
-           <h3 class="text-lg font-bold text-blue-300 mb-2">Callback Status</h3>
-           <p id="callbackUrl" class="text-sm text-blue-200"></p>
-         </div>
-       </div>
+      <!-- Callback Status -->
+      <div id="callbackStatus" class="max-w-2xl mx-auto px-4 mb-6 hidden">
+        <div class="glass rounded-2xl p-6 border border-blue-500/30">
+          <h3 class="text-lg font-bold text-blue-300 mb-2">Callback Status</h3>
+          <p id="callbackUrl" class="text-sm text-blue-200"></p>
+        </div>
+      </div>
 
-       <!-- Payment Form -->
-       <div class="max-w-2xl mx-auto px-4">
-         <div class="glass rounded-2xl p-8 neon-glow">
-           <h3 class="text-2xl font-bold text-white mb-6">Send Payment</h3>
+      <!-- Payment Form -->
+      <div class="max-w-2xl mx-auto px-4">
+        <div class="glass rounded-2xl p-8 neon-glow">
+          <h3 class="text-2xl font-bold text-white mb-6">Send Payment</h3>
 
           <div class="space-y-6">
             <div>
@@ -189,482 +204,527 @@
       </footer>
     </div>
 
-     <script>
-       // Advanced payment functionality with all features
-       let isConnected = false;
-       let currentAccount = null;
-       let currentNetwork = null;
-       let callbackUrl = null;
+    <script>
+      // Advanced payment functionality with all features
+      let isConnected = false;
+      let currentAccount = null;
+      let currentNetwork = null;
+      let callbackUrl = null;
 
-       // Network configurations
-       const networks = {
-         sepolia: {
-           chainId: '0xaa36a7',
-           chainName: 'Sepolia Test Network',
-           rpcUrls: ['https://sepolia.infura.io/v3/'],
-           blockExplorerUrls: ['https://sepolia.etherscan.io/']
-         },
-         mainnet: {
-           chainId: '0x1',
-           chainName: 'Ethereum Mainnet',
-           rpcUrls: ['https://mainnet.infura.io/v3/'],
-           blockExplorerUrls: ['https://etherscan.io/']
-         },
-         goerli: {
-           chainId: '0x5',
-           chainName: 'Goerli Test Network',
-           rpcUrls: ['https://goerli.infura.io/v3/'],
-           blockExplorerUrls: ['https://goerli.etherscan.io/']
-         }
-       };
+      // Network configurations
+      const networks = {
+        sepolia: {
+          chainId: "0xaa36a7",
+          chainName: "Sepolia Test Network",
+          rpcUrls: ["https://sepolia.infura.io/v3/"],
+          blockExplorerUrls: ["https://sepolia.etherscan.io/"],
+        },
+        mainnet: {
+          chainId: "0x1",
+          chainName: "Ethereum Mainnet",
+          rpcUrls: ["https://mainnet.infura.io/v3/"],
+          blockExplorerUrls: ["https://etherscan.io/"],
+        },
+        goerli: {
+          chainId: "0x5",
+          chainName: "Goerli Test Network",
+          rpcUrls: ["https://goerli.infura.io/v3/"],
+          blockExplorerUrls: ["https://goerli.etherscan.io/"],
+        },
+      };
 
-       // Initialize on page load
-       document.addEventListener('DOMContentLoaded', function() {
-         parseUrlParameters();
-         checkMetaMaskConnection();
-         setupEventListeners();
-         setupGSAPAnimations();
-       });
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        parseUrlParameters();
+        checkMetaMaskConnection();
+        setupEventListeners();
+        setupGSAPAnimations();
+      });
 
-       // Parse URL parameters
-       function parseUrlParameters() {
-         const urlParams = new URLSearchParams(window.location.search);
-         const receiver = urlParams.get("receiver");
-         const amount = urlParams.get("amount");
-         const callback = urlParams.get("callback");
+      // Parse URL parameters
+      function parseUrlParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const receiver = urlParams.get("receiver");
+        const amount = urlParams.get("amount");
+        const callback = urlParams.get("callback");
 
-         if (receiver) document.getElementById("receiver").value = receiver;
-         if (amount) document.getElementById("amount").value = amount;
-         if (callback) {
-           callbackUrl = callback;
-           document.getElementById("callbackUrl").textContent = `Callback URL: ${callback}`;
-           document.getElementById("callbackStatus").classList.remove("hidden");
-         }
-       }
+        if (receiver) document.getElementById("receiver").value = receiver;
+        if (amount) document.getElementById("amount").value = amount;
+        if (callback) {
+          callbackUrl = callback;
+          document.getElementById(
+            "callbackUrl"
+          ).textContent = `Callback URL: ${callback}`;
+          document.getElementById("callbackStatus").classList.remove("hidden");
+        }
+      }
 
-       // Check if MetaMask is already connected
-       async function checkMetaMaskConnection() {
-         if (typeof window.ethereum !== 'undefined') {
-           try {
-             // First check if we have accounts
-             const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-             
-             if (accounts.length > 0) {
-               // Check if we have permission to access these accounts
-               try {
-                 const permissions = await window.ethereum.request({
-                   method: 'wallet_getPermissions',
-                 });
-                 
-                 // Check if eth_accounts permission exists and is active
-                 const hasEthAccountsPermission = permissions.some(
-                   permission => permission.parentCapability === 'eth_accounts'
-                 );
-                 
-                 if (hasEthAccountsPermission) {
-                   currentAccount = accounts[0];
-                   isConnected = true;
-                   updateUI();
-                   await getCurrentNetwork();
-                 } else {
-                   // No permission, reset connection state
-                   isConnected = false;
-                   currentAccount = null;
-                   updateUI();
-                 }
-               } catch (permError) {
-                 // If permission check fails, assume no connection
-                 console.log('Permission check failed, assuming no connection');
-                 isConnected = false;
-                 currentAccount = null;
-                 updateUI();
-               }
-             } else {
-               // No accounts, definitely not connected
-               isConnected = false;
-               currentAccount = null;
-               updateUI();
-             }
-           } catch (error) {
-             console.log('No existing connection');
-             isConnected = false;
-             currentAccount = null;
-             updateUI();
-           }
-         }
-       }
+      // Check if MetaMask is already connected
+      async function checkMetaMaskConnection() {
+        if (typeof window.ethereum !== "undefined") {
+          try {
+            // First check if we have accounts
+            const accounts = await window.ethereum.request({
+              method: "eth_accounts",
+            });
 
-       // Setup event listeners
-       function setupEventListeners() {
-         // Connect wallet
-         document.getElementById("connectWallet").addEventListener("click", connectMetaMask);
-         
-         // Disconnect wallet
-         document.getElementById("disconnectWallet").addEventListener("click", disconnectWallet);
-         
-         // Network switching
-         document.getElementById("switchToSepolia").addEventListener("click", () => switchNetwork('sepolia'));
-         document.getElementById("switchToMainnet").addEventListener("click", () => switchNetwork('mainnet'));
-         document.getElementById("switchToGoerli").addEventListener("click", () => switchNetwork('goerli'));
-         
-         // Payment methods
-         document.getElementById("sendWithMetaMask").addEventListener("click", sendWithMetaMask);
-         document.getElementById("sendWithAPI").addEventListener("click", sendWithAPI);
+            if (accounts.length > 0) {
+              // Check if we have permission to access these accounts
+              try {
+                const permissions = await window.ethereum.request({
+                  method: "wallet_getPermissions",
+                });
 
-         // MetaMask event listeners
-         if (typeof window.ethereum !== 'undefined') {
-           window.ethereum.on('accountsChanged', handleAccountsChanged);
-           window.ethereum.on('chainChanged', handleChainChanged);
-         }
-       }
+                // Check if eth_accounts permission exists and is active
+                const hasEthAccountsPermission = permissions.some(
+                  (permission) => permission.parentCapability === "eth_accounts"
+                );
 
-       // GSAP Animations
-       function setupGSAPAnimations() {
-         if (typeof gsap !== 'undefined') {
-           // Initial load animation
-           gsap.from(".glass", { duration: 0.8, y: 50, opacity: 0, ease: "power2.out" });
-           
-           // Button hover animations
-           document.querySelectorAll('button').forEach(button => {
-             button.addEventListener('mouseenter', () => {
-               gsap.to(button, { duration: 0.3, scale: 1.05, ease: "power2.out" });
-             });
-             button.addEventListener('mouseleave', () => {
-               gsap.to(button, { duration: 0.3, scale: 1, ease: "power2.out" });
-             });
-           });
+                if (hasEthAccountsPermission) {
+                  currentAccount = accounts[0];
+                  isConnected = true;
+                  updateUI();
+                  await getCurrentNetwork();
+                } else {
+                  // No permission, reset connection state
+                  isConnected = false;
+                  currentAccount = null;
+                  updateUI();
+                }
+              } catch (permError) {
+                // If permission check fails, assume no connection
+                console.log("Permission check failed, assuming no connection");
+                isConnected = false;
+                currentAccount = null;
+                updateUI();
+              }
+            } else {
+              // No accounts, definitely not connected
+              isConnected = false;
+              currentAccount = null;
+              updateUI();
+            }
+          } catch (error) {
+            console.log("No existing connection");
+            isConnected = false;
+            currentAccount = null;
+            updateUI();
+          }
+        }
+      }
 
-           // Input focus animations
-           document.querySelectorAll('input').forEach(input => {
-             input.addEventListener('focus', () => {
-               gsap.to(input, { duration: 0.3, scale: 1.02, ease: "power2.out" });
-             });
-             input.addEventListener('blur', () => {
-               gsap.to(input, { duration: 0.3, scale: 1, ease: "power2.out" });
-             });
-           });
-         }
-       }
+      // Setup event listeners
+      function setupEventListeners() {
+        // Connect wallet
+        document
+          .getElementById("connectWallet")
+          .addEventListener("click", connectMetaMask);
 
-       // Connect MetaMask with account selection
-       async function connectMetaMask() {
-         if (typeof window.ethereum === 'undefined') {
-           alert('MetaMask not detected. Please install MetaMask.');
-           document.getElementById("fallbackFields").classList.remove("hidden");
-           return;
-         }
+        // Disconnect wallet
+        document
+          .getElementById("disconnectWallet")
+          .addEventListener("click", disconnectWallet);
 
-         try {
-           // Always request accounts to show account selection
-           const accounts = await window.ethereum.request({ 
-             method: 'eth_requestAccounts' 
-           });
-           
-           // Also try to request permissions to force account selection dialog
-           try {
-             await window.ethereum.request({
-               method: 'wallet_requestPermissions',
-               params: [{ eth_accounts: {} }]
-             });
-           } catch (permError) {
-             console.log('Permission request failed, continuing with account selection');
-           }
+        // Network switching
+        document
+          .getElementById("switchToSepolia")
+          .addEventListener("click", () => switchNetwork("sepolia"));
+        document
+          .getElementById("switchToMainnet")
+          .addEventListener("click", () => switchNetwork("mainnet"));
+        document
+          .getElementById("switchToGoerli")
+          .addEventListener("click", () => switchNetwork("goerli"));
 
-           currentAccount = accounts[0];
-           isConnected = true;
-           updateUI();
-           await switchToSepolia(); // Auto-switch to Sepolia
-           
-         } catch (error) {
-           alert('Failed to connect wallet: ' + error.message);
-         }
-       }
+        // Payment methods
+        document
+          .getElementById("sendWithMetaMask")
+          .addEventListener("click", sendWithMetaMask);
+        document
+          .getElementById("sendWithAPI")
+          .addEventListener("click", sendWithAPI);
 
-       // Disconnect wallet
-       async function disconnectWallet() {
-         try {
-           // Try multiple disconnect methods
-           if (window.ethereum.disconnect) {
-             await window.ethereum.disconnect();
-           }
-           
-           // Try to revoke permissions
-           try {
-             await window.ethereum.request({
-               method: 'wallet_requestPermissions',
-               params: []
-             });
-           } catch (permError) {
-             console.log('Permission revocation failed');
-           }
+        // MetaMask event listeners
+        if (typeof window.ethereum !== "undefined") {
+          window.ethereum.on("accountsChanged", handleAccountsChanged);
+          window.ethereum.on("chainChanged", handleChainChanged);
+        }
+      }
 
-           // Try to close connection
-           if (window.ethereum.close) {
-             await window.ethereum.close();
-           }
+      // GSAP Animations
+      function setupGSAPAnimations() {
+        if (typeof gsap !== "undefined") {
+          // Initial load animation
+          gsap.from(".glass", {
+            duration: 0.8,
+            y: 50,
+            opacity: 0,
+            ease: "power2.out",
+          });
 
-         } catch (error) {
-           console.log('Disconnect error:', error);
-         }
+          // Button hover animations
+          document.querySelectorAll("button").forEach((button) => {
+            button.addEventListener("mouseenter", () => {
+              gsap.to(button, {
+                duration: 0.3,
+                scale: 1.05,
+                ease: "power2.out",
+              });
+            });
+            button.addEventListener("mouseleave", () => {
+              gsap.to(button, { duration: 0.3, scale: 1, ease: "power2.out" });
+            });
+          });
 
-         // Reset state
-         isConnected = false;
-         currentAccount = null;
-         currentNetwork = null;
-         updateUI();
-       }
+          // Input focus animations
+          document.querySelectorAll("input").forEach((input) => {
+            input.addEventListener("focus", () => {
+              gsap.to(input, {
+                duration: 0.3,
+                scale: 1.02,
+                ease: "power2.out",
+              });
+            });
+            input.addEventListener("blur", () => {
+              gsap.to(input, { duration: 0.3, scale: 1, ease: "power2.out" });
+            });
+          });
+        }
+      }
 
-       // Switch network
-       async function switchNetwork(networkName) {
-         const network = networks[networkName];
-         if (!network) return;
+      // Connect MetaMask with account selection
+      async function connectMetaMask() {
+        if (typeof window.ethereum === "undefined") {
+          alert("MetaMask not detected. Please install MetaMask.");
+          document.getElementById("fallbackFields").classList.remove("hidden");
+          return;
+        }
 
-         try {
-           await window.ethereum.request({
-             method: 'wallet_switchEthereumChain',
-             params: [{ chainId: network.chainId }]
-           });
-           currentNetwork = networkName;
-           updateNetworkUI();
-         } catch (switchError) {
-           if (switchError.code === 4902) {
-             // Chain not added, try to add it
-             await addNetwork(network);
-           } else {
-             console.error('Failed to switch network:', switchError);
-           }
-         }
-       }
+        try {
+          // Always request accounts to show account selection
+          const accounts = await window.ethereum.request({
+            method: "eth_requestAccounts",
+          });
 
-       // Add network to MetaMask
-       async function addNetwork(network) {
-         try {
-           await window.ethereum.request({
-             method: 'wallet_addEthereumChain',
-             params: [network]
-           });
-         } catch (error) {
-           console.error('Failed to add network:', error);
-         }
-       }
+          // Also try to request permissions to force account selection dialog
+          try {
+            await window.ethereum.request({
+              method: "wallet_requestPermissions",
+              params: [{ eth_accounts: {} }],
+            });
+          } catch (permError) {
+            console.log(
+              "Permission request failed, continuing with account selection"
+            );
+          }
 
-       // Auto-switch to Sepolia
-       async function switchToSepolia() {
-         await switchNetwork('sepolia');
-       }
+          currentAccount = accounts[0];
+          isConnected = true;
+          updateUI();
+          await switchToSepolia(); // Auto-switch to Sepolia
+        } catch (error) {
+          alert("Failed to connect wallet: " + error.message);
+        }
+      }
 
-       // Get current network
-       async function getCurrentNetwork() {
-         try {
-           const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-           const chainIdNum = parseInt(chainId, 16);
-           
-           if (chainIdNum === 11155111) currentNetwork = 'sepolia';
-           else if (chainIdNum === 1) currentNetwork = 'mainnet';
-           else if (chainIdNum === 5) currentNetwork = 'goerli';
-           else currentNetwork = 'unknown';
-           
-           updateNetworkUI();
-         } catch (error) {
-           console.error('Failed to get current network:', error);
-         }
-       }
+      // Disconnect wallet
+      async function disconnectWallet() {
+        try {
+          // Try multiple disconnect methods
+          if (window.ethereum.disconnect) {
+            await window.ethereum.disconnect();
+          }
 
-       // Update UI based on connection state
-       function updateUI() {
-         const connectBtn = document.getElementById("connectWallet");
-         const walletInfo = document.getElementById("walletInfo");
-         const networkSwitcher = document.getElementById("networkSwitcher");
-         const fallbackFields = document.getElementById("fallbackFields");
+          // Try to revoke permissions
+          try {
+            await window.ethereum.request({
+              method: "wallet_requestPermissions",
+              params: [],
+            });
+          } catch (permError) {
+            console.log("Permission revocation failed");
+          }
 
-         if (isConnected) {
-           connectBtn.style.display = "none";
-           walletInfo.classList.remove("hidden");
-           networkSwitcher.classList.remove("hidden");
-           fallbackFields.classList.add("hidden");
-           
-           document.getElementById("walletAddress").textContent = 
-             `${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
-         } else {
-           connectBtn.style.display = "block";
-           walletInfo.classList.add("hidden");
-           networkSwitcher.classList.add("hidden");
-           fallbackFields.classList.remove("hidden");
-         }
-       }
+          // Try to close connection
+          if (window.ethereum.close) {
+            await window.ethereum.close();
+          }
+        } catch (error) {
+          console.log("Disconnect error:", error);
+        }
 
-       // Update network UI
-       function updateNetworkUI() {
-         const buttons = {
-           sepolia: document.getElementById("switchToSepolia"),
-           mainnet: document.getElementById("switchToMainnet"),
-           goerli: document.getElementById("switchToGoerli")
-         };
+        // Reset state
+        isConnected = false;
+        currentAccount = null;
+        currentNetwork = null;
+        updateUI();
+      }
 
-         // Reset all buttons
-         Object.values(buttons).forEach(btn => {
-           btn.classList.remove("bg-purple-600", "hover:bg-purple-700");
-           btn.classList.add("bg-gray-600", "hover:bg-gray-700");
-         });
+      // Switch network
+      async function switchNetwork(networkName) {
+        const network = networks[networkName];
+        if (!network) return;
 
-         // Highlight current network
-         if (currentNetwork && buttons[currentNetwork]) {
-           buttons[currentNetwork].classList.remove("bg-gray-600", "hover:bg-gray-700");
-           buttons[currentNetwork].classList.add("bg-purple-600", "hover:bg-purple-700");
-         }
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: network.chainId }],
+          });
+          currentNetwork = networkName;
+          updateNetworkUI();
+        } catch (switchError) {
+          if (switchError.code === 4902) {
+            // Chain not added, try to add it
+            await addNetwork(network);
+          } else {
+            console.error("Failed to switch network:", switchError);
+          }
+        }
+      }
 
-         // Update network name display
-         const networkNames = {
-           sepolia: 'Sepolia Testnet',
-           mainnet: 'Ethereum Mainnet',
-           goerli: 'Goerli Testnet'
-         };
-         
-         document.getElementById("networkName").textContent = 
-           networkNames[currentNetwork] || 'Unknown Network';
-       }
+      // Add network to MetaMask
+      async function addNetwork(network) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [network],
+          });
+        } catch (error) {
+          console.error("Failed to add network:", error);
+        }
+      }
 
-       // Handle account changes
-       function handleAccountsChanged(accounts) {
-         if (accounts.length === 0) {
-           disconnectWallet();
-         } else {
-           currentAccount = accounts[0];
-           updateUI();
-         }
-       }
+      // Auto-switch to Sepolia
+      async function switchToSepolia() {
+        await switchNetwork("sepolia");
+      }
 
-       // Handle chain changes
-       function handleChainChanged(chainId) {
-         window.location.reload();
-       }
+      // Get current network
+      async function getCurrentNetwork() {
+        try {
+          const chainId = await window.ethereum.request({
+            method: "eth_chainId",
+          });
+          const chainIdNum = parseInt(chainId, 16);
 
-       // Send with MetaMask
-       async function sendWithMetaMask() {
-         if (!isConnected) {
-           alert("Please connect your wallet first");
-           return;
-         }
+          if (chainIdNum === 11155111) currentNetwork = "sepolia";
+          else if (chainIdNum === 1) currentNetwork = "mainnet";
+          else if (chainIdNum === 5) currentNetwork = "goerli";
+          else currentNetwork = "unknown";
 
-         const receiver = document.getElementById("receiver").value;
-         const amount = document.getElementById("amount").value;
+          updateNetworkUI();
+        } catch (error) {
+          console.error("Failed to get current network:", error);
+        }
+      }
 
-         if (!receiver || !amount) {
-           alert("Please fill in all fields");
-           return;
-         }
+      // Update UI based on connection state
+      function updateUI() {
+        const connectBtn = document.getElementById("connectWallet");
+        const walletInfo = document.getElementById("walletInfo");
+        const networkSwitcher = document.getElementById("networkSwitcher");
+        const fallbackFields = document.getElementById("fallbackFields");
 
-         try {
-           const tx = await window.ethereum.request({
-             method: "eth_sendTransaction",
-             params: [{
-               from: currentAccount,
-               to: receiver,
-               value: "0x" + (parseFloat(amount) * 1e18).toString(16)
-             }]
-           });
+        if (isConnected) {
+          connectBtn.style.display = "none";
+          walletInfo.classList.remove("hidden");
+          networkSwitcher.classList.remove("hidden");
+          fallbackFields.classList.add("hidden");
 
-           const result = {
-             status: "success",
-             txHash: tx,
-             receiver: receiver,
-             amount: amount,
-             timestamp: new Date().toISOString()
-           };
+          document.getElementById(
+            "walletAddress"
+          ).textContent = `${currentAccount.slice(
+            0,
+            6
+          )}...${currentAccount.slice(-4)}`;
+        } else {
+          connectBtn.style.display = "block";
+          walletInfo.classList.add("hidden");
+          networkSwitcher.classList.add("hidden");
+          fallbackFields.classList.remove("hidden");
+        }
+      }
 
-           showResponse(result);
-           await sendCallback(result);
-         } catch (error) {
-           const result = {
-             status: "error",
-             message: error.message,
-             timestamp: new Date().toISOString()
-           };
-           showResponse(result);
-           await sendCallback(result);
-         }
-       }
+      // Update network UI
+      function updateNetworkUI() {
+        const buttons = {
+          sepolia: document.getElementById("switchToSepolia"),
+          mainnet: document.getElementById("switchToMainnet"),
+          goerli: document.getElementById("switchToGoerli"),
+        };
 
-       // Send with API
-       async function sendWithAPI() {
-         const sender = document.getElementById("sender").value;
-         const receiver = document.getElementById("receiver").value;
-         const amount = document.getElementById("amount").value;
-         const privateKey = document.getElementById("privateKey").value;
+        // Reset all buttons
+        Object.values(buttons).forEach((btn) => {
+          btn.classList.remove("bg-purple-600", "hover:bg-purple-700");
+          btn.classList.add("bg-gray-600", "hover:bg-gray-700");
+        });
 
-         if (!sender || !receiver || !amount || !privateKey) {
-           alert("Please fill in all fields");
-           return;
-         }
+        // Highlight current network
+        if (currentNetwork && buttons[currentNetwork]) {
+          buttons[currentNetwork].classList.remove(
+            "bg-gray-600",
+            "hover:bg-gray-700"
+          );
+          buttons[currentNetwork].classList.add(
+            "bg-purple-600",
+            "hover:bg-purple-700"
+          );
+        }
 
-         try {
-           const response = await fetch("/api/payment", {
-             method: "POST",
-             headers: {
-               "Content-Type": "application/json"
-             },
-             body: JSON.stringify({
-               sender,
-               receiver,
-               amount,
-               senderPrivateKey: privateKey,
-               callback: callbackUrl
-             })
-           });
+        // Update network name display
+        const networkNames = {
+          sepolia: "Sepolia Testnet",
+          mainnet: "Ethereum Mainnet",
+          goerli: "Goerli Testnet",
+        };
 
-           const result = await response.json();
-           showResponse(result);
-         } catch (error) {
-           const result = {
-             status: "error",
-             message: error.message,
-             timestamp: new Date().toISOString()
-           };
-           showResponse(result);
-         }
-       }
+        document.getElementById("networkName").textContent =
+          networkNames[currentNetwork] || "Unknown Network";
+      }
 
-       // Show response with animation
-       function showResponse(data) {
-         const responseViewer = document.getElementById("responseViewer");
-         const responseContent = document.getElementById("responseContent");
-         
-         responseContent.textContent = JSON.stringify(data, null, 2);
-         responseViewer.classList.remove("hidden");
-         
-         // GSAP animation for response
-         if (typeof gsap !== 'undefined') {
-           gsap.from(responseViewer, { 
-             duration: 0.5, 
-             y: 20, 
-             opacity: 0, 
-             ease: "power2.out" 
-           });
-         }
-       }
+      // Handle account changes
+      function handleAccountsChanged(accounts) {
+        if (accounts.length === 0) {
+          disconnectWallet();
+        } else {
+          currentAccount = accounts[0];
+          updateUI();
+        }
+      }
 
-       // Send callback notification
-       async function sendCallback(data) {
-         if (!callbackUrl) return;
+      // Handle chain changes
+      function handleChainChanged(chainId) {
+        window.location.reload();
+      }
 
-         try {
-           const response = await fetch(callbackUrl, {
-             method: 'POST',
-             headers: {
-               'Content-Type': 'application/json'
-             },
-             body: JSON.stringify(data)
-           });
+      // Send with MetaMask
+      async function sendWithMetaMask() {
+        if (!isConnected) {
+          alert("Please connect your wallet first");
+          return;
+        }
 
-           if (response.ok) {
-             console.log('Callback sent successfully');
-           } else {
-             console.log('Callback failed:', response.status);
-           }
-         } catch (error) {
-           console.log('Callback error:', error.message);
-         }
-       }
-     </script>
+        const receiver = document.getElementById("receiver").value;
+        const amount = document.getElementById("amount").value;
+
+        if (!receiver || !amount) {
+          alert("Please fill in all fields");
+          return;
+        }
+
+        try {
+          const tx = await window.ethereum.request({
+            method: "eth_sendTransaction",
+            params: [
+              {
+                from: currentAccount,
+                to: receiver,
+                value: "0x" + (parseFloat(amount) * 1e18).toString(16),
+              },
+            ],
+          });
+
+          const result = {
+            status: "success",
+            txHash: tx,
+            receiver: receiver,
+            amount: amount,
+            timestamp: new Date().toISOString(),
+          };
+
+          showResponse(result);
+          await sendCallback(result);
+        } catch (error) {
+          const result = {
+            status: "error",
+            message: error.message,
+            timestamp: new Date().toISOString(),
+          };
+          showResponse(result);
+          await sendCallback(result);
+        }
+      }
+
+      // Send with API
+      async function sendWithAPI() {
+        const sender = document.getElementById("sender").value;
+        const receiver = document.getElementById("receiver").value;
+        const amount = document.getElementById("amount").value;
+        const privateKey = document.getElementById("privateKey").value;
+
+        if (!sender || !receiver || !amount || !privateKey) {
+          alert("Please fill in all fields");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              sender,
+              receiver,
+              amount,
+              senderPrivateKey: privateKey,
+              callback: callbackUrl,
+            }),
+          });
+
+          const result = await response.json();
+          showResponse(result);
+        } catch (error) {
+          const result = {
+            status: "error",
+            message: error.message,
+            timestamp: new Date().toISOString(),
+          };
+          showResponse(result);
+        }
+      }
+
+      // Show response with animation
+      function showResponse(data) {
+        const responseViewer = document.getElementById("responseViewer");
+        const responseContent = document.getElementById("responseContent");
+
+        responseContent.textContent = JSON.stringify(data, null, 2);
+        responseViewer.classList.remove("hidden");
+
+        // GSAP animation for response
+        if (typeof gsap !== "undefined") {
+          gsap.from(responseViewer, {
+            duration: 0.5,
+            y: 20,
+            opacity: 0,
+            ease: "power2.out",
+          });
+        }
+      }
+
+      // Send callback notification
+      async function sendCallback(data) {
+        if (!callbackUrl) return;
+
+        try {
+          const response = await fetch(callbackUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+
+          if (response.ok) {
+            console.log("Callback sent successfully");
+          } else {
+            console.log("Callback failed:", response.status);
+          }
+        } catch (error) {
+          console.log("Callback error:", error.message);
+        }
+      }
+    </script>
   </body>
 </html>
