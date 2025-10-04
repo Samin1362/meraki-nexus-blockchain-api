@@ -13,7 +13,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend/build")));
 
 // Serve static assets with proper headers
-app.use("/static", express.static(path.join(__dirname, "../frontend/build/static")));
+app.use(
+  "/static",
+  express.static(path.join(__dirname, "../frontend/build/static"))
+);
 
 // Environment variables
 const RPC_URL = process.env.RPC_URL || "https://sepolia.drpc.org";
@@ -40,8 +43,8 @@ app.get("/api/payment", async (req, res) => {
     `📱 Serving frontend with params: receiver=${receiver}, amount=${amount}, callback=${callback}`
   );
 
-  // Serve the React app
-  res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+  // Serve the simple HTML frontend
+  res.sendFile(path.join(__dirname, "simple-frontend.html"));
 });
 
 // Process payment endpoint
