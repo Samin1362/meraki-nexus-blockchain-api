@@ -281,33 +281,40 @@
                   (permission) => permission.parentCapability === "eth_accounts"
                 );
 
-                if (hasEthAccountsPermission) {
-                  // Additional check: Verify MetaMask is actually logged in
-                  try {
-                    // Try to get the current account to verify login state
-                    const currentAccountCheck = await window.ethereum.request({
-                      method: "eth_requestAccounts",
-                    });
-
-                    if (currentAccountCheck.length > 0) {
-                      currentAccount = currentAccountCheck[0];
-                      isConnected = true;
-                      updateUI();
-                      await getCurrentNetwork();
-                    } else {
-                      // No active login, reset connection state
-                      isConnected = false;
-                      currentAccount = null;
-                      updateUI();
-                    }
-                  } catch (loginError) {
-                    // User is not logged in or denied access
-                    console.log("MetaMask not logged in or access denied");
-                    isConnected = false;
-                    currentAccount = null;
-                    updateUI();
-                  }
-                } else {
+                 if (hasEthAccountsPermission) {
+                   // Additional check: Verify MetaMask is actually logged in
+                   try {
+                     // Check if MetaMask is unlocked by trying to get the selected address
+                     const selectedAddress = await window.ethereum.request({
+                       method: "eth_accounts",
+                     });
+                     
+                     // Also check if we can get the chain ID (this requires MetaMask to be unlocked)
+                     const chainId = await window.ethereum.request({
+                       method: "eth_chainId",
+                     });
+                     
+                     if (selectedAddress.length > 0 && chainId) {
+                       // MetaMask is unlocked and user is logged in
+                       currentAccount = selectedAddress[0];
+                       isConnected = true;
+                       updateUI();
+                       await getCurrentNetwork();
+                     } else {
+                       // MetaMask is locked or user not logged in
+                       console.log("MetaMask is locked or user not logged in");
+                       isConnected = false;
+                       currentAccount = null;
+                       updateUI();
+                     }
+                   } catch (loginError) {
+                     // MetaMask is locked or user not logged in
+                     console.log("MetaMask is locked or user not logged in");
+                     isConnected = false;
+                     currentAccount = null;
+                     updateUI();
+                   }
+                 } else {
                   // No permission, reset connection state
                   isConnected = false;
                   currentAccount = null;
