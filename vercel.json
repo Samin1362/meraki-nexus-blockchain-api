@@ -19,12 +19,12 @@
       "dest": "/api/payment.js"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "/frontend/build/static/$1"
+      "src": "/",
+      "dest": "/api/payment"
     },
     {
       "src": "/(.*)",
-      "dest": "/frontend/build/index.html"
+      "dest": "/api/payment"
     }
   ],
   "env": {
