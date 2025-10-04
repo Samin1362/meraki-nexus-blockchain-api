@@ -41,7 +41,7 @@
             <div class="flex items-center">
               <h1 class="text-xl font-bold neon-text">MerakiNexus Payment</h1>
             </div>
-
+            
             <div class="flex items-center space-x-4">
               <!-- Network Switcher -->
               <div
@@ -257,39 +257,42 @@
         }
       }
 
-      // Check MetaMask connection status
-      async function checkMetaMaskConnection() {
-        if (typeof window.ethereum === "undefined") {
-          updateUI();
-          return;
-        }
+       // Check MetaMask connection status
+       async function checkMetaMaskConnection() {
+         if (typeof window.ethereum === "undefined") {
+           isConnected = false;
+           currentAccount = null;
+           currentNetwork = null;
+           updateUI();
+           return;
+         }
 
-        // change network to sepolia
-        try {
-          // Check if MetaMask is unlocked and user is logged in
-          const accounts = await window.ethereum.request({
-            method: "eth_accounts",
-          });
-          const chainId = await window.ethereum.request({
-            method: "eth_chainId",
-          });
+         try {
+           // Check if MetaMask is unlocked and user is logged in
+           const accounts = await window.ethereum.request({
+             method: "eth_accounts",
+           });
+           const chainId = await window.ethereum.request({
+             method: "eth_chainId",
+           });
 
-          if (accounts.length > 0 && chainId) {
-            currentAccount = accounts[0];
-            isConnected = true;
-            await getCurrentNetwork();
-            updateUI();
-          } else {
-            isConnected = false;
-            currentAccount = null;
-            updateUI();
-          }
-        } catch (error) {
-          isConnected = false;
-          currentAccount = null;
-        }
+           if (accounts.length > 0 && chainId) {
+             currentAccount = accounts[0];
+             isConnected = true;
+             await getCurrentNetwork();
+           } else {
+             isConnected = false;
+             currentAccount = null;
+             currentNetwork = null;
+           }
+         } catch (error) {
+           isConnected = false;
+           currentAccount = null;
+           currentNetwork = null;
+         }
 
-      }
+         updateUI();
+       }
 
       // Setup event listeners
       function setupEventListeners() {
@@ -429,85 +432,89 @@
         }
       }
 
-      // Get current network
-      async function getCurrentNetwork() {
-        try {
-          const chainId = await window.ethereum.request({
-            method: "eth_chainId",
-          });
-          const chainIdNum = parseInt(chainId, 16);
+       // Get current network
+       async function getCurrentNetwork() {
+         try {
+           const chainId = await window.ethereum.request({
+             method: "eth_chainId",
+           });
+           const chainIdNum = parseInt(chainId, 16);
 
-          if (chainIdNum === 11155111) currentNetwork = "sepolia";
-          else if (chainIdNum === 1) currentNetwork = "mainnet";
-          else if (chainIdNum === 5) currentNetwork = "goerli";
-          else currentNetwork = "unknown";
+           if (chainIdNum === 11155111) currentNetwork = "sepolia";
+           else if (chainIdNum === 1) currentNetwork = "mainnet";
+           else if (chainIdNum === 5) currentNetwork = "goerli";
+           else currentNetwork = "unknown";
 
-          updateNetworkUI();
-        } catch (error) {
-          console.error("Failed to get current network:", error);
-        }
-      }
+           updateNetworkUI();
+           updateUI(); // Also update the main UI to show network name
+         } catch (error) {
+           console.error("Failed to get current network:", error);
+         }
+       }
 
-      // Update UI based on connection state
-      function updateUI() {
-        const connectBtn = document.getElementById("connectWallet");
-        const walletInfo = document.getElementById("walletInfo");
-        const networkSwitcher = document.getElementById("networkSwitcher");
-        const fallbackFields = document.getElementById("fallbackFields");
+       // Update UI based on connection state
+       function updateUI() {
+         const connectBtn = document.getElementById("connectWallet");
+         const walletInfo = document.getElementById("walletInfo");
+         const networkSwitcher = document.getElementById("networkSwitcher");
+         const fallbackFields = document.getElementById("fallbackFields");
 
-        if (isConnected) {
-          connectBtn.style.display = "none";
-          walletInfo.classList.remove("hidden");
-          networkSwitcher.classList.remove("hidden");
-          fallbackFields.classList.add("hidden");
+         if (isConnected && currentAccount) {
+           // Wallet is connected - show wallet info and network switcher
+           connectBtn.style.display = "none";
+           walletInfo.classList.remove("hidden");
+           networkSwitcher.classList.remove("hidden");
+           fallbackFields.classList.add("hidden");
 
-          document.getElementById(
-            "walletAddress"
-          ).textContent = `${currentAccount.slice(
-            0,
-            6
-          )}...${currentAccount.slice(-4)}`;
-        } else {
-          connectBtn.style.display = "block";
-          walletInfo.classList.add("hidden");
-          networkSwitcher.classList.add("hidden");
-          fallbackFields.classList.remove("hidden");
-        }
-      }
+           // Update wallet address display
+           document.getElementById("walletAddress").textContent = 
+             `${currentAccount.slice(0, 6)}...${currentAccount.slice(-4)}`;
+           
+           // Update network name display
+           const networkNames = {
+             sepolia: "Sepolia Testnet",
+             mainnet: "Ethereum Mainnet",
+             goerli: "Goerli Testnet",
+           };
+           document.getElementById("networkName").textContent = 
+             networkNames[currentNetwork] || "Unknown Network";
+         } else {
+           // Wallet is not connected - show connect button and fallback fields
+           connectBtn.style.display = "block";
+           walletInfo.classList.add("hidden");
+           networkSwitcher.classList.add("hidden");
+           fallbackFields.classList.remove("hidden");
+           
+           // Clear any previous wallet info
+           document.getElementById("walletAddress").textContent = "";
+           document.getElementById("networkName").textContent = "";
+         }
+       }
 
-      // Update network UI
-      function updateNetworkUI() {
-        const buttons = {
-          sepolia: document.getElementById("switchToSepolia"),
-          mainnet: document.getElementById("switchToMainnet"),
-          goerli: document.getElementById("switchToGoerli"),
-        };
+       // Update network UI
+       function updateNetworkUI() {
+         const buttons = {
+           sepolia: document.getElementById("switchToSepolia"),
+           mainnet: document.getElementById("switchToMainnet"),
+           goerli: document.getElementById("switchToGoerli"),
+         };
 
-        Object.values(buttons).forEach((btn) => {
-          btn.classList.remove("bg-purple-600", "hover:bg-purple-700");
-          btn.classList.add("bg-gray-600", "hover:bg-gray-700");
-        });
+         Object.values(buttons).forEach((btn) => {
+           btn.classList.remove("bg-purple-600", "hover:bg-purple-700");
+           btn.classList.add("bg-gray-600", "hover:bg-gray-700");
+         });
 
-        if (currentNetwork && buttons[currentNetwork]) {
-          buttons[currentNetwork].classList.remove(
-            "bg-gray-600",
-            "hover:bg-gray-700"
-          );
-          buttons[currentNetwork].classList.add(
-            "bg-purple-600",
-            "hover:bg-purple-700"
-          );
-        }
-
-        const networkNames = {
-          sepolia: "Sepolia Testnet",
-          mainnet: "Ethereum Mainnet",
-          goerli: "Goerli Testnet",
-        };
-
-        document.getElementById("networkName").textContent =
-          networkNames[currentNetwork] || "Unknown Network";
-      }
+         if (currentNetwork && buttons[currentNetwork]) {
+           buttons[currentNetwork].classList.remove(
+             "bg-gray-600",
+             "hover:bg-gray-700"
+           );
+           buttons[currentNetwork].classList.add(
+             "bg-purple-600",
+             "hover:bg-purple-700"
+           );
+         }
+       }
 
       // Handle account changes
       function handleAccountsChanged(accounts) {
