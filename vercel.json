@@ -19,8 +19,8 @@
       "dest": "/api/payment.js"
     },
     {
-      "src": "/",
-      "dest": "/frontend/build/index.html"
+      "src": "/static/(.*)",
+      "dest": "/frontend/build/static/$1"
     },
     {
       "src": "/(.*)",
