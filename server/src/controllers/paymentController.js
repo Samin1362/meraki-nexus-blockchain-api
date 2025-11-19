@@ -13,14 +13,21 @@ const processPayment = async (req, res) => {
       `🚀 Processing payment: ${sender} → ${receiver} (${amount} ETH)`
     );
 
-    // Build transaction
+    // Build transaction with EIP-1559 gas pricing
     const txData = contract.methods.sendPayment(receiver).encodeABI();
+
+    // Get current gas prices
+    const gasPrice = await web3.eth.getGasPrice();
+    const maxPriorityFeePerGas = web3.utils.toWei("2", "gwei"); // Tip for miners
+    const maxFeePerGas = BigInt(gasPrice) + BigInt(maxPriorityFeePerGas); // Base + tip
+
     const tx = {
       from: account.address,
       to: CONTRACT_ADDRESS,
       value: amountInWei,
       gas: 300000,
-      gasPrice: 20000000000, // 20 gwei
+      maxFeePerGas: maxFeePerGas.toString(),
+      maxPriorityFeePerGas: maxPriorityFeePerGas,
       data: txData,
     };
 

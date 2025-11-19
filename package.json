@@ -13,13 +13,15 @@
     "test": "npm run build && npm start"
   },
   "dependencies": {
-    "express": "^4.18.2",
     "cors": "^2.8.5",
-    "ethers": "^6.8.1"
+    "ethers": "^6.8.1",
+    "express": "^4.18.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "concurrently": "^8.2.0"
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "concurrently": "^8.2.0",
+    "dotenv": "^17.2.3",
+    "nodemon": "^3.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
